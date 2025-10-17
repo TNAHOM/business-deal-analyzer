@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\RunOpportunity;
 use App\Jobs\RunRiskAnalytics;
 use App\Models\Business;
 use Illuminate\Http\Request;
@@ -51,6 +52,7 @@ class BusinessController extends Controller
         Log::info('Business created, starting analysis jobs...');
 
         (new RunRiskAnalytics($business))->handle();
+        (new RunOpportunity($business))->handle();
 
         return redirect()->route('chat.index');
     }
