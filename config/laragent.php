@@ -34,7 +34,7 @@ return [
      * which your project doesn't need
      */
     'providers' => [
-        'openai' => [
+        'default' => [
             'label' => 'openai',
             'api_key' => env('OPENAI_API_KEY'),
             'driver' => \LarAgent\Drivers\OpenAi\OpenAiDriver::class,
@@ -43,7 +43,7 @@ return [
             'default_temperature' => 1,
         ],
 
-        'default' => [
+        'gemini' => [
             'label' => 'gemini',
             'api_key' => env('GEMINI_API_KEY'),
             'driver' => \LarAgent\Drivers\OpenAi\GeminiDriver::class,
