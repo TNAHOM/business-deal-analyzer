@@ -2,15 +2,17 @@
 
 namespace App\Jobs;
 
-use App\AiAgents\OpportunityAnalysisAgent;
-use App\Enums\AnalysisType;
+use App\AiAgents\SolutionAnalysisAgent;
 use App\Models\Analysis;
 use App\Models\Business;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 
-class RunOpportunity implements ShouldQueue
+class RunSolution implements ShouldQueue
 {
+    use Queueable;
+
     protected $business;
 
     /**
@@ -26,27 +28,27 @@ class RunOpportunity implements ShouldQueue
      */
     public function handle(): void
     {
-
-        Log::info("Starting Opportunity Analysis for business #{$this->business->id}");
+        Log::info("Starting Solution Analysis for business #{$this->business->id}");
 
         try {
 
-            $agent = new OpportunityAnalysisAgent(key: 'opportunity_analysis_agent');
+            $agent = new SolutionAnalysisAgent(key: 'solution_analysis_agent');
 
             $prompt = "
-                Analyze the following business in detail for opportunity analysis and respond in JSON format that matches your schema.
+                Analyze the following business in detail for solution recommendations and respond in JSON format that matches your schema.
 
                 Business Name: {$this->business->name}
                 Sector: {$this->business->sector}
                 Description: {$this->business->description}
+                Problems: {$this->business->problems}.
                 Financials: ".json_encode($this->business->financials).'
 
-                Provide business opportunities, and a general summary.
+                Provide recommended solutions, and a general summary.
             ';
 
             $response = $agent->message(message: $prompt)->respond();
 
-            Log::info('Opportunity AI Response Received', ['response' => $response]);
+            Log::info('Solution AI Response Received', ['response' => $response]);
 
             if (is_string($response)) {
                 $decoded = json_decode($response, true);
@@ -65,11 +67,12 @@ class RunOpportunity implements ShouldQueue
 
             Analysis::create([
                 'business_id' => $this->business->id,
-                'type' => AnalysisType::OPPORTUNITY,
+                'type' => 'solution',
                 'data' => $responseArray,
             ]);
+
         } catch (\Exception $e) {
-            Log::error('Error during Opportunity Analysis', ['error' => $e->getMessage()]);
+            Log::error("Error during Solution Analysis for business #{$this->business->id}: ".$e->getMessage());
         }
     }
 }

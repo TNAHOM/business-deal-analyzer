@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Jobs\RunOpportunity;
 use App\Jobs\RunRiskAnalytics;
+use App\Jobs\RunSolution;
 use App\Models\Business;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class BusinessController extends Controller
 {
@@ -42,17 +42,17 @@ class BusinessController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'sector' => 'required|string|max:255',
+            'problems' => 'nullable|string',
             'financials' => 'nullable|array',
-        ]); 
+        ]);
 
         $business = new Business($validated);
         $business->user()->associate(Auth::user());
         $business->save();
 
-        Log::info('Business created, starting analysis jobs...');
-
-        (new RunRiskAnalytics($business))->handle();
-        (new RunOpportunity($business))->handle();
+        (new RunRiskAnalytics(business: $business))->handle();
+        (new RunOpportunity(business: $business))->handle();
+        (new RunSolution(business: $business))->handle();
 
         return redirect()->route('chat.index');
     }

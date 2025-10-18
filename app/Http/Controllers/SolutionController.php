@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
-class RiskOpportunityController extends Controller
+class SolutionController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,13 +17,11 @@ class RiskOpportunityController extends Controller
     {
         $business = Auth::user()->business;
 
-        $riskAnalysis = Analysis::where('business_id', $business->id)->where('type', AnalysisType::RISK)->latest('updated_at')->first();
+        $solutionData = Analysis::where('business_id', $business->id)->where('type', AnalysisType::SOLUTION)->latest('updated_at')
+            ->first();
 
-        $opportunityAnalysis = Analysis::where('business_id', $business->id)->where('type', AnalysisType::OPPORTUNITY)->latest('updated_at')->first();
-
-        return Inertia::render('Analysis/RiskOpportunity', [
-            'riskAnalysis' => $riskAnalysis,
-            'opportunityAnalysis' => $opportunityAnalysis,
+        return Inertia::render('Solution/Solution', [
+            'solutionsData' => $solutionData,
         ]);
     }
 

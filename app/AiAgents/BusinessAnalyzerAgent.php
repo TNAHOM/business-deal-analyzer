@@ -6,7 +6,7 @@ use LarAgent\Agent;
 
 class BusinessAnalyzerAgent extends Agent
 {
-    protected $model = 'gemini-2.0-flash-lite';
+    protected $model = 'gemini-2.5-flash-lite';
 
     protected $history = 'in_memory';
 

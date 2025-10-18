@@ -5,6 +5,7 @@ import ChatMessage from "@/Components/ChatMessage";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send, Sparkles, Bot } from "lucide-react";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
 const SAMPLE_MESSAGES = [
     {
@@ -91,7 +92,7 @@ export default function Chat() {
     ];
 
     return (
-        <>
+        <AuthenticatedLayout>
             <Head title="Chat — Business Deal Analyzer" />
 
             <div className="flex h-[calc(100vh-4rem)] flex-col bg-background">
@@ -173,6 +174,6 @@ export default function Chat() {
                     </div>
                 </div>
             </div>
-        </>
+        </AuthenticatedLayout>
     );
 }

@@ -1,29 +1,41 @@
 import React, { useState } from "react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowRight, Building2 } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { ArrowRight, Building2 } from "lucide-react";
 import { router } from "@inertiajs/react";
 
-
 export default function Onboarding() {
-    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [formData, setFormData] = useState({
         name: "",
         description: "",
         sector: "",
+        problems: "",
         financials: {
             revenue: "",
             expenses: "",
             profitMargin: "",
             burnRatePerMonth: "",
             bankBalance: "",
-        }
+        },
     });
 
     const handleChange = (a, b) => {
@@ -38,12 +50,12 @@ export default function Onboarding() {
     const updateByPath = (path, value) => {
         if (!path) return;
 
-        if (!path.includes('.')) {
+        if (!path.includes(".")) {
             setFormData((prev) => ({ ...prev, [path]: value }));
             return;
         }
 
-        const parts = path.split('.');
+        const parts = path.split(".");
         setFormData((prev) => {
             const next = { ...prev };
             let cur = next;
@@ -65,13 +77,9 @@ export default function Onboarding() {
         e.preventDefault();
         setIsSubmitting(true);
         console.log("Submitting form data:", formData);
-        router.post(
-            "/onboarding",
-            formData,
-            {
-                onFinish: () => setIsSubmitting(false),
-            }
-        );
+        router.post("/onboarding", formData, {
+            onFinish: () => setIsSubmitting(false),
+        });
     };
 
     return (
@@ -81,21 +89,32 @@ export default function Onboarding() {
                     <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
                         <Building2 className="h-8 w-8 text-primary" />
                     </div>
-                    <h1 className="font-sans text-4xl font-bold text-foreground">Tell us about your business</h1>
+                    <h1 className="font-sans text-4xl font-bold text-foreground">
+                        Tell us about your business
+                    </h1>
                     <p className="mt-3 text-lg text-muted-foreground">
-                        Help us understand your business so we can provide better insights
+                        Help us understand your business so we can provide
+                        better insights
                     </p>
                 </div>
 
                 <Card className="border-border bg-card">
                     <CardHeader>
-                        <CardTitle className="text-card-foreground">Business Information</CardTitle>
-                        <CardDescription>This information will help our AI provide more accurate analysis</CardDescription>
+                        <CardTitle className="text-card-foreground">
+                            Business Information
+                        </CardTitle>
+                        <CardDescription>
+                            This information will help our AI provide more
+                            accurate analysis
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
-                                <Label htmlFor="name" className="text-card-foreground">
+                                <Label
+                                    htmlFor="name"
+                                    className="text-card-foreground"
+                                >
                                     Business Name
                                 </Label>
                                 <Input
@@ -110,29 +129,62 @@ export default function Onboarding() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="sector" className="text-card-foreground">
+                                <Label
+                                    htmlFor="sector"
+                                    className="text-card-foreground"
+                                >
                                     Industry
                                 </Label>
-                                <Select value={formData.sector} onValueChange={(value) => handleChange("sector", value)} required>
-                                    <SelectTrigger id="sector" className="bg-background text-foreground">
+                                <Select
+                                    value={formData.sector}
+                                    onValueChange={(value) =>
+                                        handleChange("sector", value)
+                                    }
+                                    required
+                                >
+                                    <SelectTrigger
+                                        id="sector"
+                                        className="bg-background text-foreground"
+                                    >
                                         <SelectValue placeholder="Select your sector" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="technology">Technology</SelectItem>
-                                        <SelectItem value="retail">Retail</SelectItem>
-                                        <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                                        <SelectItem value="healthcare">Healthcare</SelectItem>
-                                        <SelectItem value="finance">Finance</SelectItem>
-                                        <SelectItem value="real-estate">Real Estate</SelectItem>
-                                        <SelectItem value="hospitality">Hospitality</SelectItem>
-                                        <SelectItem value="education">Education</SelectItem>
-                                        <SelectItem value="other">Other</SelectItem>
+                                        <SelectItem value="technology">
+                                            Technology
+                                        </SelectItem>
+                                        <SelectItem value="retail">
+                                            Retail
+                                        </SelectItem>
+                                        <SelectItem value="manufacturing">
+                                            Manufacturing
+                                        </SelectItem>
+                                        <SelectItem value="healthcare">
+                                            Healthcare
+                                        </SelectItem>
+                                        <SelectItem value="finance">
+                                            Finance
+                                        </SelectItem>
+                                        <SelectItem value="real-estate">
+                                            Real Estate
+                                        </SelectItem>
+                                        <SelectItem value="hospitality">
+                                            Hospitality
+                                        </SelectItem>
+                                        <SelectItem value="education">
+                                            Education
+                                        </SelectItem>
+                                        <SelectItem value="other">
+                                            Other
+                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="description" className="text-card-foreground">
+                                <Label
+                                    htmlFor="description"
+                                    className="text-card-foreground"
+                                >
                                     Business Description
                                 </Label>
                                 <Textarea
@@ -147,42 +199,101 @@ export default function Onboarding() {
                                 />
                             </div>
 
+                            {/* Problems section */}
+                            <div className="space-y-2">
+                                <Label
+                                    htmlFor="problems"
+                                    className="text-card-foreground"
+                                >
+                                    Business Problems
+                                </Label>
+                                <Textarea
+                                    id="problems"
+                                    name="problems"
+                                    placeholder="What are the main challenges your business is facing?"
+                                    rows={4}
+                                    value={formData.problems}
+                                    onChange={handleChange}
+                                    required
+                                    className="bg-background text-foreground"
+                                />
+                            </div>
+
                             {/* Financials section */}
                             <div className="grid grid-cols-2 gap-6 w-full">
                                 <div className="w-full">
-                                    <Label htmlFor="revenue" className="text-card-foreground">
+                                    <Label
+                                        htmlFor="revenue"
+                                        className="text-card-foreground"
+                                    >
                                         Annual Revenue
                                     </Label>
-                                    <Select value={formData.financials.revenue} onValueChange={(value) => handleChange("financials.revenue", value)} required>
-                                        <SelectTrigger id="revenue" className="bg-background text-foreground">
+                                    <Select
+                                        value={formData.financials.revenue}
+                                        onValueChange={(value) =>
+                                            handleChange(
+                                                "financials.revenue",
+                                                value
+                                            )
+                                        }
+                                        required
+                                    >
+                                        <SelectTrigger
+                                            id="revenue"
+                                            className="bg-background text-foreground"
+                                        >
                                             <SelectValue placeholder="Select range" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="0-100k">$0 - $100K</SelectItem>
-                                            <SelectItem value="100k-500k">$100K - $500K</SelectItem>
-                                            <SelectItem value="500k-1m">$500K - $1M</SelectItem>
-                                            <SelectItem value="1m-5m">$1M - $5M</SelectItem>
-                                            <SelectItem value="5m-10m">$5M - $10M</SelectItem>
-                                            <SelectItem value="10m+">$10M+</SelectItem>
+                                            <SelectItem value="0-100k">
+                                                $0 - $100K
+                                            </SelectItem>
+                                            <SelectItem value="100k-500k">
+                                                $100K - $500K
+                                            </SelectItem>
+                                            <SelectItem value="500k-1m">
+                                                $500K - $1M
+                                            </SelectItem>
+                                            <SelectItem value="1m-5m">
+                                                $1M - $5M
+                                            </SelectItem>
+                                            <SelectItem value="5m-10m">
+                                                $5M - $10M
+                                            </SelectItem>
+                                            <SelectItem value="10m+">
+                                                $10M+
+                                            </SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div className="w-full">
-                                    <Label htmlFor="burnRatePerMonth" className="text-card-foreground">Burn rate (per month)</Label>
+                                    <Label
+                                        htmlFor="burnRatePerMonth"
+                                        className="text-card-foreground"
+                                    >
+                                        Burn rate (per month)
+                                    </Label>
                                     <Input
                                         id="burnRatePerMonth"
                                         name="financials.burnRatePerMonth"
                                         type="number"
                                         placeholder="5000"
                                         min="0"
-                                        value={formData.financials.burnRatePerMonth}
+                                        value={
+                                            formData.financials.burnRatePerMonth
+                                        }
                                         onChange={handleChange}
                                         className="bg-background text-foreground"
                                     />
                                 </div>
 
                                 <div className="w-full">
-                                    <Label htmlFor="bankBalance" className="text-card-foreground">Balance in Bank</Label>
+                                    <Label
+                                        htmlFor="bankBalance"
+                                        className="text-card-foreground"
+                                    >
+                                        Balance in Bank
+                                    </Label>
                                     <Input
                                         id="bankBalance"
                                         name="financials.bankBalance"
@@ -196,7 +307,12 @@ export default function Onboarding() {
                                 </div>
 
                                 <div className="w-full">
-                                    <Label htmlFor="profitMargin" className="text-card-foreground">Profit Margin</Label>
+                                    <Label
+                                        htmlFor="profitMargin"
+                                        className="text-card-foreground"
+                                    >
+                                        Profit Margin
+                                    </Label>
                                     <Input
                                         id="profitMargin"
                                         name="financials.profitMargin"
@@ -210,7 +326,12 @@ export default function Onboarding() {
                                 </div>
 
                                 <div className="w-full">
-                                    <Label htmlFor="expenses" className="text-card-foreground">Expenses</Label>
+                                    <Label
+                                        htmlFor="expenses"
+                                        className="text-card-foreground"
+                                    >
+                                        Expenses
+                                    </Label>
                                     <Input
                                         id="expenses"
                                         name="financials.expenses"
@@ -225,12 +346,22 @@ export default function Onboarding() {
                             </div>
 
                             <div className="flex justify-end gap-4 pt-4">
-                                <Button type="button" variant="outline" onClick={() => router.push("/")}>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => router.push("/")}
+                                >
                                     Cancel
                                 </Button>
-                                <Button type="submit" disabled={isSubmitting} className="gap-2">
+                                <Button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="gap-2"
+                                >
                                     {isSubmitting ? "Saving..." : "Continue"}
-                                    {!isSubmitting && <ArrowRight className="h-4 w-4" />}
+                                    {!isSubmitting && (
+                                        <ArrowRight className="h-4 w-4" />
+                                    )}
                                 </Button>
                             </div>
                         </form>
@@ -239,7 +370,8 @@ export default function Onboarding() {
 
                 <div className="mt-6 text-center">
                     <p className="text-sm text-muted-foreground">
-                        Your information is secure and will only be used to provide personalized business insights
+                        Your information is secure and will only be used to
+                        provide personalized business insights
                     </p>
                 </div>
             </div>

@@ -4,6 +4,7 @@ use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RiskOpportunityController;
+use App\Http\Controllers\SolutionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -29,9 +30,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/analysis/risk-opportunity', [RiskOpportunityController::class, 'index'])
         ->name('analysis.risk-opportunity');
 
-    // Chat endpoint for Business Analyzer Agent
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/chat', [ChatController::class, 'store'])->name('chat.store');
+
+    Route::get('/solutions', [SolutionController::class, 'index'])->name('solutions.index');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

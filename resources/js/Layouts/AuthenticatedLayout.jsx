@@ -32,12 +32,26 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </NavLink>
 
                                 <NavLink
+                                    href={route("chat.index")}
+                                    active={route().current("chat.index")}
+                                >
+                                    Chat
+                                </NavLink>
+
+                                <NavLink
                                     href={route("analysis.risk-opportunity")}
                                     active={route().current(
                                         "analysis.risk-opportunity"
                                     )}
                                 >
                                     Risk & Opportunity
+                                </NavLink>
+
+                                <NavLink
+                                    href={route("solutions.index")}
+                                    active={route().current("solutions.index")}
+                                >
+                                    Solutions
                                 </NavLink>
                             </div>
                         </div>

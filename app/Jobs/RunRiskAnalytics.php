@@ -2,22 +2,21 @@
 
 namespace App\Jobs;
 
+use App\AiAgents\RiskAnalysisAgent;
 use App\Enums\AnalysisType;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
 use App\Models\Analysis;
 use App\Models\Business;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 
 class RunRiskAnalytics implements ShouldQueue
 {
-    use Queueable;
     protected $business;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(Business $business)
+    public function __construct(Business $business, $businessInfo = null)
     {
         $this->business = $business;
     }
@@ -27,42 +26,57 @@ class RunRiskAnalytics implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::info("Risk Analysis started for Business ID: {$this->business->id}");
-        $ai_analysis = [
-            'summary' => 'The business is currently in a moderate-risk environment. Market and operational challenges exist but are manageable.',
-            'risk_score' => 62,
-            'overall_outlook' => 'Moderate Risk',
-            'items' => [
-                [
-                    'title' => 'Market Volatility',
-                    'priority' => 'High',
-                    'description' => 'Rapid price fluctuations in the market may affect revenue stability.',
-                    'probability' => 88,
-                    'mitigation' => 'Implement hedging strategies and diversify product offerings to reduce exposure to market swings.',
-                ],
-                [
-                    'title' => 'Supplier Dependency',
-                    'priority' => 'Medium',
-                    'description' => 'The business relies heavily on a single supplier which could impact operations if disrupted.',
-                    'probability' => 75,
-                    'mitigation' => 'Identify and qualify alternative suppliers to ensure supply chain resilience.',
-                ],
-                [
-                    'title' => 'Operational Cost Rise',
-                    'priority' => 'Low',
-                    'description' => 'Energy and logistics costs are gradually increasing, but manageable within the current margin.',
-                    'probability' => 60,
-                    'mitigation' => 'Optimize energy usage and renegotiate logistics contracts to control cost increases.',
-                ],
-            ]
-        ];
+        Log::info("Starting Risk & Opportunity Analysis for business #{$this->business->id}");
 
-        Analysis::create([
-            'business_id' => $this->business->id,
-            'type' => AnalysisType::RISK,
-            'data' => $ai_analysis,
-        ]);
+        try {
 
-        Log::info("Risk Analysis completed for Business ID: {$this->business->id} with data: " . json_encode($ai_analysis));
+            $agent = new RiskAnalysisAgent(key: 'risk_analysis_agent');
+
+            $prompt = "
+                Analyze the following business in detail for risk analysis and respond in JSON format that matches your schema.
+                
+                Business Name: {$this->business->name}
+                Sector: {$this->business->sector}
+                Description: {$this->business->description}
+                Financials: ".json_encode($this->business->financials).'
+
+                Provide business risks, and a general summary.
+            ';
+
+            $response = $agent->message(message: $prompt)->respond();
+
+            Log::info('✅ AI Response Received', ['response' => $response]);
+
+            if (is_string($response)) {
+                $decoded = json_decode($response, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $responseArray = $decoded;
+                } else {
+                    $responseArray = ['raw' => $response];
+                }
+            } elseif (is_array($response)) {
+                $responseArray = $response;
+            } elseif (is_object($response)) {
+                $responseArray = json_decode(json_encode($response), true);
+            } else {
+                $responseArray = ['raw' => (string) $response];
+            }
+
+            Analysis::updateOrCreate(
+                [
+                    'business_id' => $this->business->id,
+                    'type' => AnalysisType::RISK,
+                ],
+                [
+                    'data' => $responseArray,
+                ]
+            );
+
+            Log::info("✅ Analysis successfully saved for business #{$this->business->id}");
+
+        } catch (\Exception $e) {
+            Log::error("Error during risk analysis: {$e->getMessage()}");
+        }
+
     }
 }
