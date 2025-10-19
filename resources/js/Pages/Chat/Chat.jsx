@@ -49,12 +49,8 @@ export default function Chat() {
                 message: userMessage.content,
             });
 
-            console.log("Chat API response:", res);
             const aiResponseText =
-                res.data.response?.text ??
-                res.data.response ??
-                res.data.agent_response ??
-                "No response";
+                res.data.agent_response?.aiResponse ?? "No response";
 
             const assistantMessage = {
                 id: `s-${Date.now()}`,

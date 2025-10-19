@@ -50,9 +50,12 @@ class BusinessController extends Controller
         $business->user()->associate(Auth::user());
         $business->save();
 
-        (new RunRiskAnalytics(business: $business))->handle();
-        (new RunOpportunity(business: $business))->handle();
-        (new RunSolution(business: $business))->handle();
+        RunRiskAnalytics::dispatch($business)->onGroup($request->group);
+        RunOpportunity::dispatch($business)->onGroup($request->group);
+        RunSolution::dispatch($business)->onGroup($request->group);
+        // (new RunRiskAnalytics(business: $business))->handle();
+        // (new RunOpportunity(business: $business))->handle();
+        // (new RunSolution(business: $business))->handle();
 
         return redirect()->route('chat.index');
     }

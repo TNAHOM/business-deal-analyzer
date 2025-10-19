@@ -7,18 +7,24 @@ use App\Enums\AnalysisType;
 use App\Models\Analysis;
 use App\Models\Business;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 
 class RunOpportunity implements ShouldQueue
 {
+    use Queueable;
+
     protected $business;
+
+    protected $updateBusinessInfo = null;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(Business $business)
+    public function __construct(Business $business, $updateBusinessInfo = null)
     {
         $this->business = $business;
+        $this->updateBusinessInfo = $updateBusinessInfo;
     }
 
     /**
@@ -40,6 +46,7 @@ class RunOpportunity implements ShouldQueue
                 Sector: {$this->business->sector}
                 Description: {$this->business->description}
                 Financials: ".json_encode($this->business->financials).'
+                NewUpdatedInfoAboutBusiness: '.($this->updateBusinessInfo ? json_encode($this->updateBusinessInfo) : 'No new updates').'
 
                 Provide business opportunities, and a general summary.
             ';
@@ -63,11 +70,23 @@ class RunOpportunity implements ShouldQueue
                 $responseArray = ['raw' => (string) $response];
             }
 
-            Analysis::create([
-                'business_id' => $this->business->id,
-                'type' => AnalysisType::OPPORTUNITY,
-                'data' => $responseArray,
-            ]);
+            Log::info('Storing Opportunity Analysis Result', ['updateBusinessInfo' => $this->updateBusinessInfo]);
+
+            if ($this->updateBusinessInfo) {
+                Analysis::update([
+                    'business_id' => $this->business->id,
+                    'type' => AnalysisType::OPPORTUNITY,
+                ], [
+                    'data' => $responseArray,
+                ]);
+            } else {
+
+                Analysis::create([
+                    'business_id' => $this->business->id,
+                    'type' => AnalysisType::OPPORTUNITY,
+                    'data' => $responseArray,
+                ]);
+            }
         } catch (\Exception $e) {
             Log::error('Error during Opportunity Analysis', ['error' => $e->getMessage()]);
         }

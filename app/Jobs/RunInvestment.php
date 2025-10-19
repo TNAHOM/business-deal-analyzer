@@ -2,11 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Enums\AnalysisType;
 use App\Models\Analysis;
 use App\Models\Business;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use App\Enums\AnalysisType;
 
 class RunInvestment implements ShouldQueue
 {
@@ -14,9 +14,12 @@ class RunInvestment implements ShouldQueue
 
     protected $business;
 
-    public function __construct(Business $business)
+    protected $updateBusinessInfo = null;
+
+    public function __construct(Business $business, $updateBusinessInfo = null)
     {
         $this->business = $business;
+        $this->updateBusinessInfo = $updateBusinessInfo;
     }
 
     /**
@@ -30,11 +33,12 @@ class RunInvestment implements ShouldQueue
             'recommendation' => 'Hold', // Placeholder recommendation
         ];
 
-        Analysis::create([
+        Analysis::updateOrCreate([
             'business_id' => $this->business->id,
-            'data' => $investmentData,
             'type' => AnalysisType::INVESTMENT,
+        ], [
+            'data' => $investmentData,
         ]);
-        
+
     }
 }
