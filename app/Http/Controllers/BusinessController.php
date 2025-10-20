@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\RunInvestment;
 use App\Jobs\RunOpportunity;
 use App\Jobs\RunRiskAnalytics;
 use App\Jobs\RunSolution;
@@ -51,11 +52,12 @@ class BusinessController extends Controller
         $business->save();
 
         RunRiskAnalytics::dispatch($business)->onGroup($request->group);
+
         RunOpportunity::dispatch($business)->onGroup($request->group);
+
         RunSolution::dispatch($business)->onGroup($request->group);
-        // (new RunRiskAnalytics(business: $business))->handle();
-        // (new RunOpportunity(business: $business))->handle();
-        // (new RunSolution(business: $business))->handle();
+
+        RunInvestment::dispatch($business)->onGroup($request->group);
 
         return redirect()->route('chat.index');
     }

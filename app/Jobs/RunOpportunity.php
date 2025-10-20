@@ -51,7 +51,10 @@ class RunOpportunity implements ShouldQueue
                 Provide business opportunities, and a general summary.
             ';
 
-            $response = $agent->message(message: $prompt)->respond();
+            $responseRaw = $agent->message(message: $prompt);
+            Log::info('Opportunity AI Raw Response Received', ['response' => $responseRaw]);
+
+            $response = $responseRaw->respond();
 
             Log::info('Opportunity AI Response Received', ['response' => $response]);
 

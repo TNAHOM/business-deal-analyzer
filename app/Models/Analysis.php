@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Enums\AnalysisType;
+use Illuminate\Database\Eloquent\Model;
 
 class Analysis extends Model
 {
@@ -14,7 +14,8 @@ class Analysis extends Model
         'type' => AnalysisType::class,
     ];
 
-    public function business() {
+    public function business()
+    {
         return $this->belongsTo(Business::class);
     }
 }

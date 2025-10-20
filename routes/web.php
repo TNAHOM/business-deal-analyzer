@@ -34,6 +34,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/chat', [ChatController::class, 'store'])->name('chat.store');
 
     Route::get('/solutions', [SolutionController::class, 'index'])->name('solutions.index');
+
+    Route::get('/offers', [App\Http\Controllers\OfferController::class, 'index'])->name('offers.index');
+    Route::post('/offers', [App\Http\Controllers\OfferController::class, 'store'])->name('offers.store');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
