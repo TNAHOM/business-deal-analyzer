@@ -1,61 +1,170 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<p align="center"><strong>Business Deal Analyzer</strong><br/>
+An AI-assisted Laravel + Inertia + React application that analyzes your business to surface risks, opportunities, investment recommendations, and actionable solutions.</p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+---
 
-## About Laravel
+## Overview
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Business Deal Analyzer helps founders and operators make informed decisions by:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   Capturing core business information during onboarding
+-   Letting users chat with an AI assistant that triages questions to the right analysis track
+-   Running background jobs that use AI agents to generate structured analyses
+-   Persisting results so you can review Risks, Opportunities, Solutions, and Investment guidance
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Tech stack:
 
-## Learning Laravel
+-   Backend: Laravel 12 (PHP 8.2+), Queues, Eloquent
+-   Frontend: Inertia + React, Tailwind, Vite
+-   AI layer: [maestroerror/laragent] for agent orchestration and structured outputs
+-   Routing helpers: Ziggy
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Key domain models:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+-   `Business` — user’s business profile captured during onboarding
+-   `Analysis` — stores AI outputs (`type`: risk, opportunity, solution, investment)
+-   `Offer` — tracks investment offers and ties into investment analysis
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Implemented endpoints
 
-## Laravel Sponsors
+Auth scaffolding is provided by Breeze (login/register/verify/etc. under `routes/auth.php`). The core endpoints are:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+-   GET `/` — Welcome page
+-   GET `/dashboard` — Auth required
 
-### Premium Partners
+-   Onboarding (auth + verified):
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+    -   GET `/onboarding` → `BusinessController@index` — Redirects to chat if a business already exists; otherwise shows onboarding form
+    -   POST `/onboarding` → `BusinessController@store` — Creates `Business` and dispatches all four analysis jobs in background
 
-## Contributing
+-   Chat (auth):
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    -   GET `/chat` → `ChatController@index` — Inertia chat page
+    -   POST `/chat` → `ChatController@store` — Classifies the message using an AI agent and dispatches the corresponding background job
 
-## Code of Conduct
+-   Risk & Opportunity (auth):
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+    -   GET `/analysis/risk-opportunity` → `RiskOpportunityController@index` — Shows latest Risk and Opportunity analyses for the user’s business
 
-## Security Vulnerabilities
+-   Solutions (auth):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    -   GET `/solutions` → `SolutionController@index` — Shows latest Solution analysis
 
-## License
+-   Offers (auth):
+    -   GET `/offers` → `OfferController@index` — List offers and show latest Investment analysis
+    -   POST `/offers` → `OfferController@store` — Create a new offer
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Profile routes (edit/update/delete) are also available under `/profile` for authenticated users.
+
+## How AI is used (LarAgent)
+
+This project uses [LarAgent](https://github.com/maestroerror/laragent) to define typed agents with strict response schemas and to talk to multiple providers.
+
+Configured providers (`config/laragent.php`):
+
+-   `gemini` (default for this app’s agents) — uses `GEMINI_API_KEY`
+-   Additional providers available: `openai`, `groq`, `claude`, `openrouter`, `ollama`
+
+Agents (see `app/AiAgents`):
+
+-   `BusinessAnalyzerAgent` — used by chat to categorize user intent into: risk | opportunity | investment | solution | none
+-   `RiskAnalysisAgent` — generates a structured Risk report
+-   `OpportunityAnalysisAgent` — generates a structured Opportunity report
+-   `InvestementAnalysisAgent` — generates a structured Investment recommendation
+-   `SolutionAnalysisAgent` — generates structured problem/solution recommendations
+
+All agents are configured to use provider `gemini` and model `gemini-2.5-flash-lite`. Each agent defines a `responseSchema` to validate and normalize AI output.
+
+Environment variables for the AI layer:
+
+-   `GEMINI_API_KEY` — required for the current default provider
+-   Optionally configure other keys if you switch providers: `OPENAI_API_KEY`, `GROQ_API_KEY`, `ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`
+
+## Background jobs and queues
+
+Four jobs implement the analysis pipelines (see `app/Jobs`):
+
+-   `RunRiskAnalytics` — uses `RiskAnalysisAgent`; upserts `Analysis` with type `risk`
+-   `RunOpportunity` — uses `OpportunityAnalysisAgent`; creates/updates `Analysis` with type `opportunity`
+-   `RunInvestment` — uses `InvestementAnalysisAgent`; creates/updates `Analysis` with type `investment`
+-   `RunSolution` — uses `SolutionAnalysisAgent`; creates `Analysis` with type `solution`
+
+When are jobs dispatched?
+
+-   Onboarding (`POST /onboarding`) — kicks off all four jobs for the newly created business
+-   Chat (`POST /chat`) — categorizes the user’s message and dispatches only the relevant job
+
+Queue setup:
+
+-   Ensure the jobs table is migrated (this repo includes the `create_jobs_table` migration)
+-   Set `QUEUE_CONNECTION=database` in `.env`
+-   Run a worker: `php artisan queue:listen` or `php artisan queue:work`
+-   For local dev, the provided script runs the queue listener automatically (see below)
+
+## Local setup
+
+Prerequisites: PHP 8.2+, Composer, Node 18+, a database (SQLite/MySQL/Postgres), and a Gemini API key.
+
+1. Install dependencies and build assets
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+
+# Configure your DB in .env, then run migrations
+php artisan migrate
+
+# Configure AI provider
+# e.g. in .env: GEMINI_API_KEY=your_key_here
+
+npm install
+npm run build
+```
+
+Tip: you can also run our one-shot setup script:
+
+```bash
+composer setup
+```
+
+2. Start the app in development
+
+```bash
+# This runs PHP server, queue listener, live logs, and Vite in parallel
+composer dev
+```
+
+Manual alternative:
+
+```bash
+php artisan serve
+php artisan queue:listen --tries=1
+npm run dev
+```
+
+## Data model shape (high level)
+
+-   `Business (id, user_id, name, description, sector, financials:json, problems:text)`
+-   `Analysis (id, business_id, type:enum[risk|opportunity|solution|investment], data:json)`
+-   `Offer (id, business_id, title, investor, amount:int, equity:float, postMoneyValuation:float, offerDate:date, status, type)`
+
+## Frontend pages (Inertia + React)
+
+-   Chat: `resources/js/Pages/Chat/Chat.jsx` → `/chat`
+-   Onboarding: `resources/js/Pages/Onboarding/Onboarding.jsx` → `/onboarding`
+-   Risk & Opportunity: `resources/js/Pages/Analysis/RiskOpportunity.jsx` → `/analysis/risk-opportunity`
+-   Solutions: `resources/js/Pages/Solution/Solution.jsx` → `/solutions`
+-   Offers: `resources/js/Pages/Offers/Offers.jsx` → `/offers`
+
+## Example: Chat API
+
+-   Request: `POST /chat` with JSON `{ "message": "Analyze our customer churn risk" }`
+-   Response: `{ "user_message": "…", "agent_response": { "aiResponse": "…", "assignTo": "risk", "directUserQuestion": "…" } }`
+-   Side effect: enqueues the matching analysis job
+
+## Notes
+
+-   All AI outputs are stored under `Analysis` using a strict schema per analysis type. If a provider returns non-JSON, we store a best-effort `raw` payload.
+-   Agents default to Gemini; you can switch providers in `config/laragent.php` and by setting corresponding API keys.
+-   For local dev, prefer `composer dev` which also tails logs via Laravel Pail for quick debugging.
